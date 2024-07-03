@@ -1,0 +1,115 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2761
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 document.addEventListener('DOMContentLoaded', () => \{\
+    const display = document.querySelector('.calculator-screen');\
+    const operationDisplay = document.querySelector('.calculator-operation');\
+    const keys = document.querySelector('.calculator-keys');\
+\
+    let currentInput = '0';\
+    let firstOperand = null;\
+    let operator = null;\
+    let waitingForSecondOperand = false;\
+\
+    function updateDisplay() \{\
+        display.value = currentInput;\
+        operationDisplay.value = firstOperand !== null ? `$\{firstOperand\} $\{operator || ''\}` : '';\
+    \}\
+\
+    function handleNumber(number) \{\
+        if (waitingForSecondOperand) \{\
+            currentInput = number;\
+            waitingForSecondOperand = false;\
+        \} else \{\
+            currentInput = currentInput === '0' ? number : currentInput + number;\
+        \}\
+    \}\
+\
+    function handleOperator(nextOperator) \{\
+        const inputValue = parseFloat(currentInput);\
+\
+        if (operator && waitingForSecondOperand) \{\
+            operator = nextOperator;\
+            return;\
+        \}\
+\
+        if (firstOperand === null) \{\
+            firstOperand = inputValue;\
+        \} else if (operator) \{\
+            const result = calculate(firstOperand, inputValue, operator);\
+            currentInput = String(result);\
+            firstOperand = result;\
+        \}\
+\
+        waitingForSecondOperand = true;\
+        operator = nextOperator;\
+    \}\
+\
+    function calculate(firstOperand, secondOperand, operator) \{\
+        switch (operator) \{\
+            case '+':\
+                return firstOperand + secondOperand;\
+            case '-':\
+                return firstOperand - secondOperand;\
+            case '*':\
+                return firstOperand * secondOperand;\
+            case '/':\
+                return firstOperand / secondOperand;\
+            default:\
+                return secondOperand;\
+        \}\
+    \}\
+\
+    function handleDecimal(dot) \{\
+        if (!currentInput.includes(dot)) \{\
+            currentInput += dot;\
+        \}\
+    \}\
+\
+    function resetCalculator() \{\
+        currentInput = '0';\
+        firstOperand = null;\
+        operator = null;\
+        waitingForSecondOperand = false;\
+    \}\
+\
+    keys.addEventListener('click', (event) => \{\
+        const \{ target \} = event;\
+        if (!target.matches('button')) return;\
+\
+        if (target.classList.contains('operator')) \{\
+            handleOperator(target.value);\
+            updateDisplay();\
+            return;\
+        \}\
+\
+        if (target.classList.contains('decimal')) \{\
+            handleDecimal(target.value);\
+            updateDisplay();\
+            return;\
+        \}\
+\
+        if (target.classList.contains('all-clear')) \{\
+            resetCalculator();\
+            updateDisplay();\
+            return;\
+        \}\
+\
+        if (target.classList.contains('equal-sign')) \{\
+            handleOperator(target.value);\
+            updateDisplay();\
+            waitingForSecondOperand = false;\
+            operator = null;\
+            firstOperand = null;\
+            return;\
+        \}\
+\
+        handleNumber(target.value);\
+        updateDisplay();\
+    \});\
+\});\
+}
